@@ -1,0 +1,48 @@
+------------------------------------------------------------------------------
+-- IBM Confidential 
+-- OCO Source Materials 
+-- 5725-C09
+-- (C) Copyright IBM Corp. 2011 
+-- The source code for this program is not published or otherwise divested of its trade secrets, 
+-- irrespective of what has been deposited with the U.S. Copyright Office.
+------------------------------------------------------------------------------
+
+--*****************************************************************************
+-- BigInsights TextAnalytics sample Indicator extractor
+-- 
+-- File name: main.aql
+-- Description: Main AQL file - we shall consume all exports in here to process.
+--*****************************************************************************
+
+
+module main;
+
+-------------------------------------------------------------------------------
+-- The output of the extractor 
+-------------------------------------------------------------------------------
+
+-- A view belonging to a module other than the one housing this AQL script needs
+-- to be imported into the current module's namespace before being manipulated as
+-- follows.
+
+import view Indicator from module metricsIndicator_features as Indicator;
+
+import function udfToUpperCase from module metricsIndicator_udfs as udfToUpperCase;
+
+
+output view Indicator;
+
+------------------------------------------------------------------------------------------
+
+-- Use the UDF function to normalize the metric of an Indicator mention
+
+create view IndicatorUDF as
+select R.*, udfToUpperCase(R.metric) as metric_normalized
+from Indicator R;
+
+output view IndicatorUDF;
+
+--------------------------------------------------------------------------------------------
+
+
+

@@ -1,0 +1,78 @@
+------------------------------------------------------------------------------
+-- IBM Confidential 
+-- OCO Source Materials 
+-- 5725-C09
+-- (C) Copyright IBM Corp. 2011 
+-- The source code for this program is not published or otherwise divested of its trade secrets, 
+-- irrespective of what has been deposited with the U.S. Copyright Office.
+------------------------------------------------------------------------------
+
+--*****************************************************************************
+-- BigInsights TextAnalytics sample Indicator extractor
+-- 
+-- File name: aql/Indicator/refinement.aql
+-- Description: Filter and Consolidate rules
+--*****************************************************************************
+
+
+module metricsIndicator_features;
+
+
+------------------------------------------------------------------------------------------------------
+
+-- Identify one type of invalid Indicator candidates: mentions that contain  
+-- another metric in between the Metric and Amount mentions 
+-- Example:
+-- 	[EPS growth]; Revenue of [$99.9 billion]
+-- 	[revenue] up 19 percent; Free cash flow of [$8.7 billion]
+
+create view IndicatorInvalid1 as
+select R.* 
+from IndicatorCandidate R, Metric M
+where Contains(SpanBetween(R.metric, R.amount), M.match);
+
+-------------------------------------------------------------------------------------------------------
+
+-- Identify another type of invalid Indicator candidates: mentions that contain 
+-- a sentence boundary (span multiple sentences) are invalid
+
+create view IndicatorInvalid2 as
+select R.metric as metric, R.amount as amount, R.match as match
+from IndicatorCandidate R, SentenceBoundary B
+where Contains(R.match, B.match);
+
+-------------------------------------------------------------------------------------------------------
+
+-- Union all invalid Indicator mentions 
+
+create view IndicatorInvalid as
+(select R.* from IndicatorInvalid1 R)
+union all
+(select R.* from IndicatorInvalid2 R); 
+
+-------------------------------------------------------------------------------------------------------
+
+-- Filter out invalid Indicator mentions from the set of all Indicator candidates
+
+create view IndicatorAll as
+(select R.* from IndicatorCandidate R)
+minus
+(select R.* from IndicatorInvalid R);  
+
+--------------------------------------------------------------------------------------------------------
+
+-- Consolidate overlapping Indicator mentions
+
+create view Indicator as
+select R.metric as metric, R.amount as amount, R.match as match
+from IndicatorAll R
+consolidate on R.match using 'NotContainedWithin';
+
+---------------------------------------------------------------------------------------------------------
+
+-- For a view from the current module to be consumed inside another module, it needs to be exported
+-- from the source module, and likewise, imported in the consuming module. 
+
+export view Indicator;
+
+---------------------------------------------------------------------------------------------------------

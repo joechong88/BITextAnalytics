@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<module-metadata module-name="main" compilationTime="Fri Oct 19 17:30:58 PDT 2012" hostName="IBM-MU6B8HFN72R" userName="Sudarshan" productVersion="2.0.0.0" dependsOn="metricsIndicator_features,metricsIndicator_udfs" tokenizerType="STANDARD">
+    <dictionaries/>
+    <views>
+        <view viewName="IndicatorUDF" exported="false" external="false" output="true">
+            <schema>
+                <column name="amount" type="Span"/>
+                <column name="match" type="Span"/>
+                <column name="metric" type="Span"/>
+                <column name="metric_normalized" type="Text"/>
+            </schema>
+            <costRec numJavaRegexes="0.0" numSimpleRegexes="2.25" numMultiRegexes="0.0" numNLJoins="0.0" numMergeJoins="6.5" numHashJoins="0.0"/>
+        </view>
+        <view viewName="Indicator" exported="false" external="false" output="true" moduleName="metricsIndicator_features" outputAlias="metricsIndicator_features.Indicator">
+            <schema>
+                <column name="amount" type="Span"/>
+                <column name="match" type="Span"/>
+                <column name="metric" type="Span"/>
+            </schema>
+            <costRec numJavaRegexes="0.0" numSimpleRegexes="2.25" numMultiRegexes="0.0" numNLJoins="0.0" numMergeJoins="6.5" numHashJoins="0.0"/>
+        </view>
+        <view viewName="Document" exported="false" external="false" output="false">
+            <schema>
+                <column name="text" type="Text"/>
+                <column name="label" type="Text"/>
+            </schema>
+        </view>
+    </views>
+    <tables/>
+    <functions/>
+</module-metadata>
+
+$Document = DocScan(
+  (
+    "text" => "Text",
+    "label" => "Text"
+  )
+);
+$_{"main.IndicatorUDF"} =
+Project(
+  (
+    "R.amount" => "amount",
+    "R.match" => "match",
+    "R.metric" => "metric",
+    "@@IndicatorUDF@@col3" => "metric_normalized"
+  ),
+  ApplyFunc(
+    metricsIndicator_udfs.udfToUpperCase(
+      GetCol(
+        "R.metric"
+      )
+    ) => "@@IndicatorUDF@@col3",
+    Project(
+      (
+        "amount" => "R.amount",
+        "match" => "R.match",
+        "metric" => "R.metric"
+      ),
+      $_{"metricsIndicator_features.Indicator"}
+    )
+  )
+);
+
+Output: $_{"metricsIndicator_features.Indicator"}, $_{"main.IndicatorUDF"};

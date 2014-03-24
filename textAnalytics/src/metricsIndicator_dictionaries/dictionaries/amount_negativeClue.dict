@@ -1,0 +1,15 @@
+#
+# IBM Confidential 
+# OCO Source Materials 
+# 5725-C09
+# (C) Copyright IBM Corp. 2011 
+# The source code for this program is not published or otherwise divested of its trade secrets, 
+# irrespective of what has been deposited with the U.S. Copyright Office.
+# -----------------------------------------------------------------------------
+# Dictionary of clues indicative of a relative amount
+# used for filtering out false positive Amount candidates
+# -----------------------------------------------------------------------------
+increased
+decreased
+up
+down

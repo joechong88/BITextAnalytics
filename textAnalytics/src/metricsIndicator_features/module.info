@@ -1,0 +1,16 @@
+/**
+* Licensed Materials - Property of IBM. (C) Copyright IBM Corp. 2010, 2013. US Government Users Restricted Rights - Use, duplication  disclosure restricted by GSA ADP Schedule Contract with IBM Corp.
+*
+* This module is used as the container of all features defined towards extracting financial metrics indicators. These features have been
+* broken down into basics, concepts and refinements accordingly. Basics contain simple features that are eventually used in defining more
+* indicative candidate instances of some pattern of a financial metric. Refinements contain the final set of patterns that would eventually
+* extract the financial metric indicators, after some constraint based refinements to the candidates extracted previously.
+*
+* @appType 	Financial Metrics Indicator
+* @dataSource	Supports data from financial reports
+* @languages	en
+* @docField     text the content of the financial report that is used in extracting financial metrics indicators.
+* @docField     label the id or label of the document being processed
+* @author	IBM
+*
+*/
