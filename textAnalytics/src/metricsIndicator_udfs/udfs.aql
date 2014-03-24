@@ -1,0 +1,43 @@
+------------------------------------------------------------------------------
+-- IBM Confidential 
+-- OCO Source Materials 
+-- 5725-C09
+-- (C) Copyright IBM Corp. 2011 
+-- The source code for this program is not published or otherwise divested of its trade secrets, 
+-- irrespective of what has been deposited with the U.S. Copyright Office.
+------------------------------------------------------------------------------
+
+--*****************************************************************************
+
+-- BigInsights TextAnalytics sample Indicator extractor
+-- 
+-- File name: udfs.aql
+-- Description: AQL file to define and export user-defined functions 
+
+--*****************************************************************************
+
+module metricsIndicator_udfs; 
+
+
+-------------------------------------------------------------------------------------------------------
+
+/** 
+* A user-defined function to convert the text of the input Span argument to upper case
+* 
+* Source for this UDF under TextAnalytics/src/com.ibm.biginsights.textanalytics.udf.ExampleUDFs.java
+*
+* @param p1 the input argument to convert the case of, to upper case
+*
+* @return a String that contains the text of p1 in upper case
+*/
+
+create function udfToUpperCase(p1 Span)
+return String
+external_name 'udfjars/exampleUDFs.jar:com.ibm.biginsights.textanalytics.udf.ExampleUDFs!toUpperCase'
+language java 
+deterministic
+return null on null input;
+ 
+export function udfToUpperCase;
+
+--------------------------------------------------------------------------------------------------------

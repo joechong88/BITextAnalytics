@@ -1,0 +1,14 @@
+/**
+* Licensed Materials - Property of IBM. (C) Copyright IBM Corp. 2010, 2013. US Government Users Restricted Rights - Use, duplication  disclosure restricted by GSA ADP Schedule Contract with IBM Corp.
+*
+* This module is used as a container to hold udf .jars and corresponding AQL to define them as user defined functions, besides
+* exporting them for consumption elsewhere.
+*
+* @appType 	Financial Metrics Indicator
+* @dataSource	Supports data from financial reports
+* @languages	en
+* @docField     text the content of the financial report that is used in extracting financial metrics indicators.
+* @docField     label the id or label of the document being processed
+* @author	IBM
+*
+*/

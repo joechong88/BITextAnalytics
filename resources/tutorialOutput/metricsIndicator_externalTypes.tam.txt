@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<module-metadata module-name="metricsIndicator_externalTypes" compilationTime="Fri Oct 19 17:30:57 PDT 2012" hostName="IBM-MU6B8HFN72R" userName="Sudarshan" productVersion="2.0.0.0" dependsOn="" tokenizerType="STANDARD">
+    <dictionaries/>
+    <views>
+        <view viewName="ExternalView_Copy" exported="false" external="false" output="true">
+            <schema>
+                <column name="match" type="Text"/>
+                <column name="id" type="Integer"/>
+            </schema>
+            <costRec numJavaRegexes="0.0" numSimpleRegexes="0.0" numMultiRegexes="0.0" numNLJoins="0.0" numMergeJoins="0.0" numHashJoins="0.0"/>
+        </view>
+        <view viewName="Document" exported="false" external="false" output="false">
+            <schema>
+                <column name="text" type="Text"/>
+                <column name="label" type="Text"/>
+            </schema>
+        </view>
+        <view viewName="ExternalView" exported="false" external="true" output="false" externalName="ExternalViewFromJson">
+            <schema>
+                <column name="match" type="Text"/>
+                <column name="id" type="Integer"/>
+            </schema>
+            <costRec numJavaRegexes="0.0" numSimpleRegexes="0.0" numMultiRegexes="0.0" numNLJoins="0.0" numMergeJoins="0.0" numHashJoins="0.0"/>
+        </view>
+    </views>
+    <tables/>
+    <functions/>
+</module-metadata>
+
+CreateExternalView("metricsIndicator_externalTypes.ExternalView",
+"ExternalViewFromJson",
+  (
+    "match" => "Text",
+    "id" => "Integer"
+  )
+);
+$_{"metricsIndicator_externalTypes.ExternalView"} = ExternalViewScan("metricsIndicator_externalTypes.ExternalView");
+$Document = DocScan(
+  (
+    "text" => "Text",
+    "label" => "Text"
+  )
+);
+$_{"metricsIndicator_externalTypes.ExternalView_Copy"} =
+Project(
+  (
+    "ExternalView.match" => "match",
+    "ExternalView.id" => "id"
+  ),
+  Project(
+    (
+      "id" => "ExternalView.id",
+      "match" => "ExternalView.match"
+    ),
+    $_{"metricsIndicator_externalTypes.ExternalView"}
+  )
+);
+
+Output: $_{"metricsIndicator_externalTypes.ExternalView_Copy"};

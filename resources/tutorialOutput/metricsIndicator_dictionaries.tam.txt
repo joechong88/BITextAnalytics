@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<module-metadata module-name="metricsIndicator_dictionaries" compilationTime="Fri Oct 19 17:30:57 PDT 2012" hostName="IBM-MU6B8HFN72R" userName="Sudarshan" productVersion="2.0.0.0" dependsOn="" tokenizerType="STANDARD">
+    <dictionaries>
+        <dict dictName="abbreviations" exported="true" external="true" case="insensitive" languages="en" allowEmpty="false" srcExtTable="false"/>
+        <dict dictName="amount_negativeClues" exported="true" external="false" case="insensitive" languages="en" allowEmpty="false" srcExtTable="false"/>
+        <dict dictName="metrics" exported="true" external="false" case="insensitive" languages="en" allowEmpty="false" srcExtTable="false"/>
+        <dict dictName="units" exported="true" external="false" case="insensitive" languages="en" allowEmpty="false" srcExtTable="false"/>
+    </dictionaries>
+    <views>
+        <view viewName="Document" exported="false" external="false" output="false">
+            <schema>
+                <column name="text" type="Text"/>
+                <column name="label" type="Text"/>
+            </schema>
+        </view>
+    </views>
+    <tables/>
+    <functions/>
+</module-metadata>
+
+$Document = DocScan(
+  (
+    "text" => "Text",
+    "label" => "Text"
+  )
+);
+CreateDict(
+    "name" => "metricsIndicator_dictionaries.abbreviations",
+    "language" => "en",
+    "case" => "insensitive",
+    "isExternal" => "true",
+    "allowEmpty" => "false"
+);
+
+CreateDict(
+    "name" => "metricsIndicator_dictionaries.amount_negativeClues",
+    "language" => "en",
+    "case" => "insensitive",
+    "isExternal" => "false"
+);
+
+CreateDict(
+    "name" => "metricsIndicator_dictionaries.metrics",
+    "language" => "en",
+    "case" => "insensitive",
+    "isExternal" => "false"
+);
+
+CreateDict(
+    "name" => "metricsIndicator_dictionaries.units",
+    "language" => "en",
+    "case" => "insensitive",
+    "isExternal" => "false"
+);
+

@@ -1,0 +1,15 @@
+/**
+* Licensed Materials - Property of IBM. (C) Copyright IBM Corp. 2010, 2013. US Government Users Restricted Rights - Use, duplication  disclosure restricted by GSA ADP Schedule Contract with IBM Corp.
+* 
+* This module is used as the container of all dictionaries and tables required towards extracting financial metrics indicators.
+* It also illustrates the utility of external types via a create external dictionary statement internally. The dictionary file for this
+* can be found under resources/dictionaries/* inside this same sample project.
+*
+* @appType 	Financial Metrics Indicator
+* @dataSource	Supports data from financial reports
+* @languages	en
+* @docField     text the content of the financial report that is used in extracting financial metrics indicators.
+* @docField     label the id or label of the document being processed
+* @author	IBM
+*
+*/

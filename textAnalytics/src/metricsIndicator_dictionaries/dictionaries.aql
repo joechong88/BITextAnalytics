@@ -1,0 +1,82 @@
+------------------------------------------------------------------------------
+-- IBM Confidential 
+-- OCO Source Materials 
+-- 5725-C09
+-- (C) Copyright IBM Corp. 2011 
+-- The source code for this program is not published or otherwise divested of its trade secrets, 
+-- irrespective of what has been deposited with the U.S. Copyright Office.
+------------------------------------------------------------------------------ 
+
+-----------------------------------------------------------------------------------------------------------------
+-- This file shall export all dictionaries housed by this module. Similar files can be created and made usable 
+-- towards customizing the set of dictionaries being exposed by this module. A similar pattern can be followed to
+-- create custom modules that house custom dictionaries towards language or domain specific goals.
+-----------------------------------------------------------------------------------------------------------------
+
+
+module metricsIndicator_dictionaries;
+
+
+-------------------------------------------------------------------------------------------------------------
+
+/**
+*
+* This external dictionary shall contain entries, each of which are abbreviations used to filter out false
+* positives of sentence boundaries.
+*
+*/
+
+create external dictionary abbreviations 
+	allow_empty false
+	with language as 'en';
+
+export dictionary abbreviations;
+
+--------------------------------------------------------------------------------------------------------------
+
+/**
+*
+* This dictionary shall contain entries, each of which are used to filter out false positives of 'amount' candidates.
+*
+* Example entries: 'increased', 'decreased', 'down', 'up'
+*
+*/
+
+create dictionary amount_negativeClues 
+	from file 'dictionaries/amount_negativeClue.dict'
+	with language as 'en';
+	
+export dictionary amount_negativeClues;
+
+---------------------------------------------------------------------------------------------------------------
+
+/**
+*
+*  Define a dictionary of financial metrics
+*
+*  Example entries: 'gross profit margin', 'cash flow', 'diluted earnings per share'
+*/
+
+
+create dictionary metrics 
+	from file 'dictionaries/metric.dict' 
+	with language as 'en';
+	
+export dictionary metrics;
+
+----------------------------------------------------------------------------------------------------------------
+
+/**
+*
+* Define a dictionary of financial amount units
+* 
+* Example entries: 'million', 'billion' 
+*/
+
+create dictionary units 
+	from file 'dictionaries/unit.dict' 
+	with language as 'en';
+
+export dictionary units;
+
+----------------------------------------------------------------------------------------------------------------- 

@@ -1,0 +1,650 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<module-metadata module-name="metricsIndicator_features" compilationTime="Fri Oct 19 17:30:58 PDT 2012" hostName="IBM-MU6B8HFN72R" userName="Sudarshan" productVersion="2.0.0.0" dependsOn="metricsIndicator_dictionaries" tokenizerType="STANDARD">
+    <dictionaries/>
+    <views>
+        <view viewName="Indicator" exported="true" external="false" output="false">
+            <schema>
+                <column name="metric" type="Span"/>
+                <column name="amount" type="Span"/>
+                <column name="match" type="Span"/>
+            </schema>
+            <costRec numJavaRegexes="0.0" numSimpleRegexes="2.25" numMultiRegexes="0.0" numNLJoins="0.0" numMergeJoins="6.5" numHashJoins="0.0"/>
+        </view>
+        <view viewName="Document" exported="false" external="false" output="false">
+            <schema>
+                <column name="text" type="Text"/>
+                <column name="label" type="Text"/>
+            </schema>
+            <costRec numJavaRegexes="0.0" numSimpleRegexes="0.0" numMultiRegexes="0.0" numNLJoins="0.0" numMergeJoins="0.0" numHashJoins="0.0"/>
+        </view>
+    </views>
+    <tables/>
+    <functions/>
+</module-metadata>
+
+$Document = DocScan(
+  (
+    "text" => "Text",
+    "label" => "Text"
+  )
+);
+CreateDict(
+    "name" => "_AmountPercent_TmpDict__1",
+    "language" => "de,es,en,fr,it,x_unspecified",
+    "case" => "insensitive",
+    "isExternal" => "false"
+);
+
+$_{"metricsIndicator_features._AmountAbsolute_TmpView_/\\$/__1"} =
+Project(
+  (
+    "group_0" => "group_0"
+  ),
+  FastRegexTok(/\$/, (0 => "group_0"), "DOTALL", 1, 1,"D.text",
+    Project(
+      (
+        "text" => "D.text"
+      ),
+      $Document
+    )
+  )
+);
+
+$_{"metricsIndicator_features._AmountPercent_TmpView_\'percent\'__7"} =
+Project(
+  (
+    "group_0" => "group_0"
+  ),
+  Project(
+    (
+      "text" => "D.text",
+      "__sdm_match" => "group_0"
+    ),
+    $SDM_OUTPUT__AmountPercent_TmpDict__1_WITH_Default_OVER_Document_text
+  )
+);
+
+$_{"metricsIndicator_features.Metric"} =
+Project(
+  (
+    "match" => "match"
+  ),
+  Project(
+    (
+      "text" => "D.text",
+      "__sdm_match" => "match"
+    ),
+    $SDM_OUTPUT_metricsIndicator_dictionaries_metrics_WITH_Default_OVER_Document_text
+  )
+);
+
+$_{"metricsIndicator_features.Number"} =
+Project(
+  (
+    "match" => "match"
+  ),
+  FastRegex(/\d+(\.\d+)?/, (0 => "match"), "DOTALL", "R.text",
+    Project(
+      (
+        "text" => "R.text"
+      ),
+      $Document
+    )
+  )
+);
+
+$_{"metricsIndicator_features.SentenceBoundary"} =
+Select(
+  Not(
+    ContainsDict(
+      StringConst(
+        "metricsIndicator_dictionaries.abbreviations"
+      ),
+      CombineSpans(
+        LeftContextTok(
+          GetCol(
+            "match"
+          ),
+          IntConst(
+            1
+          )
+        ),
+        GetCol(
+          "match"
+        )
+      )
+    )
+  ),
+  Project(
+    (
+      "match" => "match"
+    ),
+    FastRegex(/(\n\s*\n)|([\.\?!]+\s)/, (0 => "match"), "DOTALL", "D.text",
+      Project(
+        (
+          "text" => "D.text"
+        ),
+        $Document
+      )
+    )
+  )
+);
+
+$_{"metricsIndicator_features.Unit"} =
+Project(
+  (
+    "match" => "match"
+  ),
+  Project(
+    (
+      "text" => "R.text",
+      "__sdm_match" => "match"
+    ),
+    $SDM_OUTPUT_metricsIndicator_dictionaries_units_WITH_Default_OVER_Document_text
+  )
+);
+
+$_{"metricsIndicator_features._AmountAbsolute_TmpView_<N.match>__2"} =
+Project(
+  (
+    "N.match" => "group_0"
+  ),
+  Project(
+    (
+      "match" => "N.match"
+    ),
+    $_{"metricsIndicator_features.Number"}
+  )
+);
+
+$_{"metricsIndicator_features._AmountAbsolute_TmpView_<U.match>__3"} =
+Project(
+  (
+    "U.match" => "group_0"
+  ),
+  Project(
+    (
+      "match" => "U.match"
+    ),
+    $_{"metricsIndicator_features.Unit"}
+  )
+);
+
+$_{"metricsIndicator_features._AmountAbsolute_TmpView_<N.match> <U.match>?__4"} =
+Union(
+  Project(
+    (
+      "@@_AmountAbsolute_TmpView_<N.match> <U.match>?__4_1@@col0" => "group_0"
+    ),
+    ApplyFunc(
+      CombineSpans(
+        GetCol(
+          "S0.group_0"
+        ),
+        GetCol(
+          "S1.group_0"
+        )
+      ) => "@@_AmountAbsolute_TmpView_<N.match> <U.match>?__4_1@@col0",
+      AdjacentJoin(
+        FollowedByTok(
+          GetCol(
+            "S1.group_0"
+          ),
+          GetCol(
+            "S0.group_0"
+          ),
+          IntConst(
+            0
+          ),
+          IntConst(
+            0
+          )
+        ),
+        Project(
+          (
+            "group_0" => "S1.group_0"
+          ),
+          $_{"metricsIndicator_features._AmountAbsolute_TmpView_<U.match>__3"}
+        ),
+        Project(
+          (
+            "group_0" => "S0.group_0"
+          ),
+          $_{"metricsIndicator_features._AmountAbsolute_TmpView_<N.match>__2"}
+        )
+      )
+    )
+  ),
+  Project(
+    (
+      "S0.group_0" => "group_0"
+    ),
+    Project(
+      (
+        "group_0" => "S0.group_0"
+      ),
+      $_{"metricsIndicator_features._AmountAbsolute_TmpView_<N.match>__2"}
+    )
+  )
+);
+
+$_{"metricsIndicator_features._AmountAbsolute_TmpView_/\\$/ (:?<N.match> <U.match>?)__5"} =
+Project(
+  (
+    "@@_AmountAbsolute_TmpView_/\\$/ (:?<N.match> <U.match>?)__5@@col0" => "group_0"
+  ),
+  ApplyFunc(
+    CombineSpans(
+      GetCol(
+        "S0.group_0"
+      ),
+      GetCol(
+        "S1.group_0"
+      )
+    ) => "@@_AmountAbsolute_TmpView_/\\$/ (:?<N.match> <U.match>?)__5@@col0",
+    AdjacentJoin(
+      FollowsTok(
+        GetCol(
+          "S0.group_0"
+        ),
+        GetCol(
+          "S1.group_0"
+        ),
+        IntConst(
+          0
+        ),
+        IntConst(
+          0
+        )
+      ),
+      Project(
+        (
+          "group_0" => "S0.group_0"
+        ),
+        $_{"metricsIndicator_features._AmountAbsolute_TmpView_/\\$/__1"}
+      ),
+      Project(
+        (
+          "group_0" => "S1.group_0"
+        ),
+        $_{"metricsIndicator_features._AmountAbsolute_TmpView_<N.match> <U.match>?__4"}
+      )
+    )
+  )
+);
+
+$_{"metricsIndicator_features._AmountPercent_TmpView_<N.match>__6"} =
+Project(
+  (
+    "N.match" => "group_0"
+  ),
+  Project(
+    (
+      "match" => "N.match"
+    ),
+    $_{"metricsIndicator_features.Number"}
+  )
+);
+
+$_{"metricsIndicator_features._AmountPercent_TmpView_<N.match> \'percent\'__8"} =
+Project(
+  (
+    "@@_AmountPercent_TmpView_<N.match> \'percent\'__8@@col0" => "group_0"
+  ),
+  ApplyFunc(
+    CombineSpans(
+      GetCol(
+        "S0.group_0"
+      ),
+      GetCol(
+        "S1.group_0"
+      )
+    ) => "@@_AmountPercent_TmpView_<N.match> \'percent\'__8@@col0",
+    AdjacentJoin(
+      FollowedByTok(
+        GetCol(
+          "S1.group_0"
+        ),
+        GetCol(
+          "S0.group_0"
+        ),
+        IntConst(
+          0
+        ),
+        IntConst(
+          0
+        )
+      ),
+      Project(
+        (
+          "group_0" => "S1.group_0"
+        ),
+        $_{"metricsIndicator_features._AmountPercent_TmpView_\'percent\'__7"}
+      ),
+      Project(
+        (
+          "group_0" => "S0.group_0"
+        ),
+        $_{"metricsIndicator_features._AmountPercent_TmpView_<N.match>__6"}
+      )
+    )
+  )
+);
+
+$_{"metricsIndicator_features.AmountAbsolute"} =
+Project(
+  (
+    "V.group_0" => "match"
+  ),
+  Consolidate(
+    "ContainedWithin",
+    GetCol(
+      "V.group_0"
+    ),
+    Project(
+      (
+        "group_0" => "V.group_0"
+      ),
+      $_{"metricsIndicator_features._AmountAbsolute_TmpView_/\\$/ (:?<N.match> <U.match>?)__5"}
+    )
+  )
+);
+
+$_{"metricsIndicator_features.AmountPercent"} =
+Project(
+  (
+    "V.group_0" => "match"
+  ),
+  Project(
+    (
+      "group_0" => "V.group_0"
+    ),
+    $_{"metricsIndicator_features._AmountPercent_TmpView_<N.match> \'percent\'__8"}
+  )
+);
+
+$_{"metricsIndicator_features.AmountCandidate"} =
+Union(
+  Project(
+    (
+      "R.match" => "match"
+    ),
+    Project(
+      (
+        "match" => "R.match"
+      ),
+      $_{"metricsIndicator_features.AmountAbsolute"}
+    )
+  ),
+  Project(
+    (
+      "R.match" => "match"
+    ),
+    Project(
+      (
+        "match" => "R.match"
+      ),
+      $_{"metricsIndicator_features.AmountPercent"}
+    )
+  )
+);
+
+$_{"metricsIndicator_features.Amount"} =
+Project(
+  (
+    "R.match" => "match"
+  ),
+  Select(
+    Not(
+      MatchesDict(
+        StringConst(
+          "metricsIndicator_dictionaries.amount_negativeClues"
+        ),
+        LeftContextTok(
+          GetCol(
+            "R.match"
+          ),
+          IntConst(
+            1
+          )
+        )
+      )
+    ),
+    Project(
+      (
+        "match" => "R.match"
+      ),
+      $_{"metricsIndicator_features.AmountCandidate"}
+    )
+  )
+);
+
+$_{"metricsIndicator_features.IndicatorCandidate"} =
+Project(
+  (
+    "M.match" => "metric",
+    "A.match" => "amount",
+    "@@IndicatorCandidate@@col2" => "match"
+  ),
+  ApplyFunc(
+    CombineSpans(
+      GetCol(
+        "M.match"
+      ),
+      GetCol(
+        "A.match"
+      )
+    ) => "@@IndicatorCandidate@@col2",
+    SortMergeJoin(
+      FollowsTok(
+        GetCol(
+          "M.match"
+        ),
+        GetCol(
+          "A.match"
+        ),
+        IntConst(
+          0
+        ),
+        IntConst(
+          10
+        )
+      ),
+      Project(
+        (
+          "match" => "M.match"
+        ),
+        $_{"metricsIndicator_features.Metric"}
+      ),
+      Project(
+        (
+          "match" => "A.match"
+        ),
+        $_{"metricsIndicator_features.Amount"}
+      )
+    )
+  )
+);
+
+$_{"metricsIndicator_features.IndicatorInvalid1"} =
+Project(
+  (
+    "R.metric" => "metric",
+    "R.amount" => "amount",
+    "R.match" => "match"
+  ),
+  SortMergeJoin(
+    ContainedWithin(
+      GetCol(
+        "M.match"
+      ),
+      SpanBetween(
+        GetCol(
+          "R.metric"
+        ),
+        GetCol(
+          "R.amount"
+        )
+      )
+    ),
+    Project(
+      (
+        "match" => "M.match"
+      ),
+      $_{"metricsIndicator_features.Metric"}
+    ),
+    Project(
+      (
+        "amount" => "R.amount",
+        "match" => "R.match",
+        "metric" => "R.metric"
+      ),
+      $_{"metricsIndicator_features.IndicatorCandidate"}
+    )
+  )
+);
+
+$_{"metricsIndicator_features.IndicatorInvalid2"} =
+Project(
+  (
+    "R.metric" => "metric",
+    "R.amount" => "amount",
+    "R.match" => "match"
+  ),
+  SortMergeJoin(
+    ContainedWithin(
+      GetCol(
+        "B.match"
+      ),
+      GetCol(
+        "R.match"
+      )
+    ),
+    Project(
+      (
+        "match" => "B.match"
+      ),
+      $_{"metricsIndicator_features.SentenceBoundary"}
+    ),
+    Project(
+      (
+        "amount" => "R.amount",
+        "match" => "R.match",
+        "metric" => "R.metric"
+      ),
+      $_{"metricsIndicator_features.IndicatorCandidate"}
+    )
+  )
+);
+
+$_{"metricsIndicator_features.IndicatorInvalid"} =
+Union(
+  Project(
+    (
+      "R.metric" => "metric",
+      "R.amount" => "amount",
+      "R.match" => "match"
+    ),
+    Project(
+      (
+        "amount" => "R.amount",
+        "match" => "R.match",
+        "metric" => "R.metric"
+      ),
+      $_{"metricsIndicator_features.IndicatorInvalid1"}
+    )
+  ),
+  Project(
+    (
+      "R.metric" => "metric",
+      "R.amount" => "amount",
+      "R.match" => "match"
+    ),
+    Project(
+      (
+        "amount" => "R.amount",
+        "match" => "R.match",
+        "metric" => "R.metric"
+      ),
+      $_{"metricsIndicator_features.IndicatorInvalid2"}
+    )
+  )
+);
+
+$_{"metricsIndicator_features.IndicatorAll"} =
+Difference(
+  Project(
+    (
+      "R.metric" => "metric",
+      "R.amount" => "amount",
+      "R.match" => "match"
+    ),
+    Project(
+      (
+        "amount" => "R.amount",
+        "match" => "R.match",
+        "metric" => "R.metric"
+      ),
+      $_{"metricsIndicator_features.IndicatorCandidate"}
+    )
+  ),
+  Project(
+    (
+      "R.metric" => "metric",
+      "R.amount" => "amount",
+      "R.match" => "match"
+    ),
+    Project(
+      (
+        "amount" => "R.amount",
+        "match" => "R.match",
+        "metric" => "R.metric"
+      ),
+      $_{"metricsIndicator_features.IndicatorInvalid"}
+    )
+  ));
+
+$_{"metricsIndicator_features.Indicator"} =
+Project(
+  (
+    "R.metric" => "metric",
+    "R.amount" => "amount",
+    "R.match" => "match"
+  ),
+  Consolidate(
+    "NotContainedWithin",
+    GetCol(
+      "R.match"
+    ),
+    Project(
+      (
+        "amount" => "R.amount",
+        "match" => "R.match",
+        "metric" => "R.metric"
+      ),
+      $_{"metricsIndicator_features.IndicatorAll"}
+    )
+  )
+);
+
+# Dicts() operator created through Shared Dictionary Matching
+(
+  $SDM_TMP__AmountPercent_TmpDict__1_WITH_Default_OVER_Document_text,
+  $SDM_TMP_metricsIndicator_dictionaries_metrics_WITH_Default_OVER_Document_text,
+  $SDM_TMP_metricsIndicator_dictionaries_units_WITH_Default_OVER_Document_text
+) = 
+Dicts(
+  (
+    "_AmountPercent_TmpDict__1" => "Default",
+    "metricsIndicator_dictionaries.metrics" => "Default",
+    "metricsIndicator_dictionaries.units" => "Default"
+  ),
+  "text", "__sdm_match", $Document
+);
+
+# Apply labels to outputs of generated Dicts() operator.
+$SDM_OUTPUT__AmountPercent_TmpDict__1_WITH_Default_OVER_Document_text = Project(("__sdm_match" => "__sdm_match", "text" => "text" ), $SDM_TMP__AmountPercent_TmpDict__1_WITH_Default_OVER_Document_text);
+$SDM_OUTPUT_metricsIndicator_dictionaries_metrics_WITH_Default_OVER_Document_text = Project(("__sdm_match" => "__sdm_match", "text" => "text" ), $SDM_TMP_metricsIndicator_dictionaries_metrics_WITH_Default_OVER_Document_text);
+$SDM_OUTPUT_metricsIndicator_dictionaries_units_WITH_Default_OVER_Document_text = Project(("__sdm_match" => "__sdm_match", "text" => "text" ), $SDM_TMP_metricsIndicator_dictionaries_units_WITH_Default_OVER_Document_text);
+
+
