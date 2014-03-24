@@ -1,0 +1,39 @@
+------------------------------------------------------------------------------
+-- IBM Confidential 
+-- OCO Source Materials 
+-- 5725-C09
+-- (C) Copyright IBM Corp. 2012 
+-- The source code for this program is not published or otherwise divested of its trade secrets, 
+-- irrespective of what has been deposited with the U.S. Copyright Office.
+------------------------------------------------------------------------------
+
+--*****************************************************************************
+-- BigInsights TextAnalytics sample Indicator extractor
+-- 
+-- File name: externalView.aql
+-- Description: AQL file containing external view and prepare a copy of this
+-- external view
+--*****************************************************************************
+
+
+module metricsIndicator_externalTypes;
+
+
+--------------------------------------------------------------------------------
+
+/**
+* This external view, named 'EmailMetadata', contains three fields, first and second fields, 
+* of type Text and the third, of type Integer. At run time, the external view 'EmailMetadata' is 
+* automatically populated from an external type named 'EmailMetadataSrc', or directly populated 
+* using the Text Analytics Java API [see tutorial Java code for an example]. 
+*
+* @field fromAddress the address from which a certain message was sent 
+* @field toAddress the address to which a certain message was sent
+* @field msgid the ID of the message sent from one entity to another
+*/
+
+create external view EmailMetadata(fromAddress Text, toAddress Text, msgid Integer)   
+external_name 'EmailMetadataSrc';
+
+-- Output external view
+output view EmailMetadata;
